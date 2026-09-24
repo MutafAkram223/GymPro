@@ -1,0 +1,57 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies
+      run: npm install
+      working-directory: ./frontend
+
+    - name: Build Web App
+      run: npm run build
+      env:
+        VITE_API_URL: ${{ secrets.VITE_API_URL }}
+      working-directory: ./frontend
+
+    - name: Sync Capacitor
+      run: npx cap sync android
+      working-directory: ./frontend
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Make Gradlew Executable
+      run: chmod +x gradlew
+      working-directory: ./frontend/android
+
+    - name: Build APK
+      run: ./gradlew assembleDebug --no-daemon
+      working-directory: ./frontend/android
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: GymPro-APK
+        path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 7

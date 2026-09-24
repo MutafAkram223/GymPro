@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.db
+.env
+seed_db.py
+seed_v2.py
+update_pending.py
