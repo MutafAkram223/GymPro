@@ -16,24 +16,21 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
 
     - name: Install Dependencies
-      run: npm install > install-log.txt 2>&1
+      run: npm install
       working-directory: ./frontend
-      continue-on-error: true
 
     - name: Build Web App
-      run: npm run build > build-log.txt 2>&1
+      run: npm run build
       env:
         VITE_API_URL: ${{ secrets.VITE_API_URL }}
       working-directory: ./frontend
-      continue-on-error: true
 
     - name: Sync Capacitor
-      run: npx cap sync android > sync-log.txt 2>&1
+      run: npx cap sync android
       working-directory: ./frontend
-      continue-on-error: true
 
     - name: Setup Java
       uses: actions/setup-java@v4
@@ -42,19 +39,8 @@ jobs:
         java-version: '17'
 
     - name: Build APK
-      run: .\gradlew.bat assembleDebug --no-daemon > gradle-log.txt 2>&1
+      run: .\gradlew.bat assembleDebug --no-daemon
       working-directory: ./frontend/android
-      continue-on-error: true
-
-    - name: Commit Logs
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git add install-log.txt build-log.txt sync-log.txt android/gradle-log.txt
-        git commit -m "Add logs"
-        git push
-      working-directory: ./frontend
-      continue-on-error: true
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
